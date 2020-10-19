@@ -94,7 +94,7 @@
     }
 
     function parseTcpStringAsHttpRequest($string) {
-        //divide string by spaces, to get method and uri
+        //divide string by spaces, to get method and uri 
         $method_uri_array = explode(" ", $string);
         $method = $method_uri_array[0];
         $uri = $method_uri_array[1];
