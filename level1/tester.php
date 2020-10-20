@@ -48,7 +48,7 @@ POST /api/checkLoginAndPassword HTTP/1.1
 Accept: */*
 Content-Type: application/x-www-form-urlencoded
 User-Agent: Mozilla/4.0
-Content-Length: 35
+Content-Length: 28
 
 login=student&password=12345
 T4
@@ -162,7 +162,7 @@ if (is_resource($process)) {
     // remove date header Date: Sun, 18 Oct 2012 10:36:20 GMT
     $c2 = preg_replace("/Date: [^\n]+\n/", "", $content);
     //$c2 = preg_replace("/\r/", "", $c2);
-    if ($c2 === $answers[$argv[1]]) {
+    if ($c2 == $answers[$argv[1]]) {
     	echo "response is correct :)";
     }
     else {

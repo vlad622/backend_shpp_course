@@ -20,8 +20,8 @@
 
     $contents = readHttpLikeInput();
 
-    //Processes http request, if request is correct calculates numbers in request,
-    //otherwise generates errorcode and sends it to response
+    /* Processes http request, if request is correct calculates numbers in request,
+       otherwise generates errorcode and sends it to response */
     function processHttpRequest($method, $uri, $headers, $body) {
         //result of equation, if it`s present
         $result;
@@ -73,7 +73,7 @@
             "Apache/2.2.14 (Win32)",
             "Closed",
             "text/html; charset=utf-8",
-            strlen($result),
+            strlen($result)
         );
 
         //Sending responce to user
@@ -94,7 +94,7 @@
     }
 
     function parseTcpStringAsHttpRequest($string) {
-        //divide string by spaces, to get method and uri
+        //divide string by spaces, to get method and uri 
         $method_uri_array = explode(" ", $string);
         $method = $method_uri_array[0];
         $uri = $method_uri_array[1];
@@ -104,8 +104,8 @@
         $header = [];
         $count = count($headers);
   
-        //iterate array of headers to divide them and add to anodher array
-        //iterating from 1, cause first cell in array it is method and uri that was already added
+        /*iterate array of headers to divide them and add to anodher array
+          iterating from 1, cause first cell in array it is method and uri that was already added */
         for ($i=1; $i < $count ; $i++) {
             $line = explode(": ", $headers[$i]);
   
