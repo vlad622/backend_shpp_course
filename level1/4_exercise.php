@@ -57,9 +57,6 @@
                         $lines = array_chunk(preg_split('/(:)|(\s)/mD', $passwordsFile), 2); 
                         $loginArray = array_column($lines, 0);
                         $passArray = array_column($lines, 1);
-
-// TODO try make associated array and getpassword by login 
-
                         //Iterate and compare logins and passwords with given ones
                         for ($i=0; $i < count($passArray); $i++) { 
                             if ($authData["login"] == $loginArray[$i] && $authData["password"] == $passArray[$i]) {
