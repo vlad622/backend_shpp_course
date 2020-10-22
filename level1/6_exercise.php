@@ -23,7 +23,7 @@
             file_put_contents(PATH_TO_FILE, $visitsCount + 1);
             echo $visitsCount;
         }
-
+        
         countVisits();
         ?>
     </h1>

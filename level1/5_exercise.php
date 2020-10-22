@@ -2,10 +2,12 @@
 
     const HTTP_VER = "HTTP/1.1 ";
     const URI = "/api/checkLoginAndPassword";
-    const METHOD = "POST";
+    const METHOD = "GET";
     const EXPECTED_CONTENT_TYPE = "application/x-www-form-urlencoded";
     const AUTH_DATABASE = "passwordsFile.txt";
     const BODY_TO_RESPONSE = '<h1 style="color:green">FOUND</h1>';
+    const STUDENT_DIR = "student";
+    const ANOTHER_DIR = "another";
 
 
     function readHttpLikeInput() {
@@ -28,6 +30,58 @@
 
     $contents = readHttpLikeInput();
 
+    //Divide given path to folder and file(if present)
+    function uriToPath($uri) {
+        $path = $uri;
+        $file = "";
+
+        $folders = preg_split('/\/|\\\\/m', $uri);
+        $foldersLength = count($folders) - 1;
+        $isLastElementFile = preg_match('/(^\w+)\.\w+/', $folders[$foldersLength]);
+       
+        //Check if file present
+        if ($isLastElementFile == TRUE) {
+            $file = $folders[$foldersLength];
+            unset($folders[$foldersLength]);
+            $path = implode("/", $folders);
+        }    
+
+        return array(
+            "path" => $path,
+            "file" => $file
+        );
+    }
+
+    //Returns content of file situated on given path, or FALSE if path is wrong
+    function getFileContent($folder, $uri) {
+        //If uri equals / index.html should be opened by default
+        if($uri == "/") {
+            $uri = "/index.html";
+        }
+
+        //Check if fodler on given path exists
+        if (file_exists($folder)) {
+            //Divide given path to folder and file(if present)
+            $pathAndFile = uriToPath($folder . $uri);
+
+            //Check if fodler on given path exists
+            if (file_exists($pathAndFile["path"])) {
+                chdir($pathAndFile["path"]);
+            } else {
+                return;
+            }
+            
+            //Check if given file exists
+            if (file_exists($pathAndFile["file"])) {
+                $bodyToResponse = file_get_contents($pathAndFile["file"]);
+
+                return $bodyToResponse;
+            } 
+        }
+
+        return FALSE;
+    }
+
     /* Processes http request, if request is correct returns HTML code,
        otherwise generates errorcode and sends it to response */
     function processHttpRequest($method, $uri, $headers, $body) {
@@ -40,56 +94,35 @@
             $contentType = $headers[1];
             $contentLength = $headers[3];
 
-            //Check if request have correct uri
-            if ($uri == URI) {
-                //Check if request have correct Content-type
-                if ($contentType[1] == EXPECTED_CONTENT_TYPE ) {
-                    $passwordsFile = "";
-    
-                    //Check if passwords file is present on server
-                    if (file_exists(AUTH_DATABASE)) {
-                        $passwordsFile = file_get_contents(AUTH_DATABASE);
-                        
-                        //Making of associated array with login and password from body
-                        $chunks = array_chunk(preg_split('/(=|&)/', $body), 2);
-                        $authData = array_combine(array_column($chunks, 0), array_column($chunks, 1));
-                        //Making arrays with logins and passwords
-                        $lines = array_chunk(preg_split('/(:)|(\s)/mD', $passwordsFile), 2); 
-                        $loginArray = array_column($lines, 0);
-                        $passArray = array_column($lines, 1);
-                        //Iterate and compare logins and passwords with given ones
-                        for ($i=0; $i < count($passArray); $i++) { 
-                            if ($authData["login"] == $loginArray[$i] && $authData["password"] == $passArray[$i]) {
-                                /*  Login and password found
-                                    Generating success statuscode and message */
-                                $statuscode = 200;
-                                $statusmessage = "OK";
-                                $bodyToResponse = BODY_TO_RESPONSE;
-    
-                                break;
-                            } 
-                        }
-                    } else {
-                        /*  Passwords file not found on server
-                            Generating statuscode and message about error */
-                        $statuscode = 500;
-                        $statusmessage = "Internal Server Error";
-                        $bodyToResponse = $statusmessage;
-                    }
-                } else {
-                    /*  Content type not matches
-                        Generating statuscode and message about error */
-                    $statuscode = 415;
-                    $statusmessage = "Unsupported Media Type";
-                    $bodyToResponse = $statusmessage;
-                }
+            // Get host address
+            $host = $headers[0];
+            //Finding root directory upon host first word
+            $rootDirectory = explode(".", $host[1])[0];
+
+            switch ($rootDirectory) {
+                case STUDENT_DIR:
+                    //Get file content
+                    $bodyToResponse = getFileContent(STUDENT_DIR, $uri);            
+                    break;
+                case ANOTHER_DIR:
+                    //Get file content
+                    $bodyToResponse = getFileContent(ANOTHER_DIR, $uri);
+                    break;
+                default:
+                    //File not found
+                    $bodyToResponse = FALSE;
+                    break;
+            }
+
+            if($bodyToResponse != FALSE) {
+                $statuscode = 200;
+                $statusmessage = "OK";
             } else {
-                /*  Uri not found
-                    Generating statuscode and message */
                 $statuscode = 404;
-                $statusmessage = "Not Found";
+                $statusmessage = "File not found";
                 $bodyToResponse = $statusmessage;
             }
+
         } else {
             /*  Mathod isn`t corect 
                 Generating statuscode and message about error */
