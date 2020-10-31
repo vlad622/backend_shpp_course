@@ -9,6 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT') {
         $request = file_get_contents("php://input"); 
         $decodedRequest = json_decode($request, true);
         $checked = intval($decodedRequest['checked']);
+
+        if ($checked > 1) {
+            #error code
+        }
+        
         $dataToChange = array($decodedRequest['text'], $checked, $decodedRequest['id']);
 
         $db = OpenConnection();
